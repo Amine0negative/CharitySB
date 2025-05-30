@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Charity Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .stat-card {
+            border-radius: 15px;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .campaign-card {
+            transition: transform 0.3s;
+        }
+        .campaign-card:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">Charity Management</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/campaigns">Campaigns</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/donations">Donations</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/profile">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Error Messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}">Error message here</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${campaignError}" class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${campaignError}">Campaign error here</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${donationError}" class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${donationError}">Donation error here</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <img src="https://ui-avatars.com/api/?name=[[${user.firstName}+'+'+${user.lastName}]]&size=128"
+                                 class="rounded-circle" alt="Profile Picture">
+                        </div>
+                        <h3 class="card-title" th:text="${user.firstName + ' ' + user.lastName}">User Name</h3>
+                        <p class="text-muted" th:text="${user.email}">email@example.com</p>
+                        <a href="/profile/edit" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card stat-card bg-primary text-white shadow">
+                            <div class="card-body text-center">
+                                <i class="fas fa-hand-holding-heart fa-2x mb-2"></i>
+                                <h5>Total Donations</h5>
+                                <h3>$<span th:text="${totalDonations}">0</span></h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card bg-success text-white shadow">
+                            <div class="card-body text-center">
+                                <i class="fas fa-bullhorn fa-2x mb-2"></i>
+                                <h5>My Campaigns</h5>
+                                <h3 th:text="${#lists.size(myCampaigns)}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card bg-info text-white shadow">
+                            <div class="card-body text-center">
+                                <i class="fas fa-gift fa-2x mb-2"></i>
+                                <h5>Donations Made</h5>
+                                <h3 th:text="${#lists.size(myDonations)}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-white">
+                        <h4 class="mb-0">My Campaigns</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item" th:each="campaign : ${myCampaigns}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1" th:text="${campaign.title}">Campaign Title</h5>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i>
+                                            Ends <span th:text="${#temporals.format(campaign.endDate, 'dd MMM yyyy')}">End Date</span>
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="progress mb-2" style="width: 100px;">
+                                            <div class="progress-bar bg-success" role="progressbar"
+                                                 th:style="'width: ' + ${campaign.progressPercentage} + '%'"
+                                                 th:text="${campaign.progressPercentage} + '%'">
+                                            </div>
+                                        </div>
+                                        <a th:href="@{/campaigns/{id}(id=${campaign.id})}" class="btn btn-sm btn-outline-primary">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center p-3" th:if="${#lists.isEmpty(myCampaigns)}">
+                                <p class="text-muted mb-0">You haven't created any campaigns yet.</p>
+                                <a href="/campaigns/create" class="btn btn-primary mt-2">Create Campaign</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-white">
+                        <h4 class="mb-0">Recent Donations</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item" th:each="donation : ${myDonations}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1" th:text="${donation.campaign.title}">Campaign Title</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i>
+                                            <span th:text="${#temporals.format(donation.createdAt, 'dd MMM yyyy')}">Donation Date</span>
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span th:text="${donation.amount}">Amount</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-center p-3" th:if="${#lists.isEmpty(myDonations)}">
+                                <p class="text-muted mb-0">You haven't made any donations yet.</p>
+                                <a href="/campaigns" class="btn btn-primary mt-2">View Campaigns</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${campaign.title} + ' - Charity Management'">Campaign Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">Charity Management</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/campaigns">Campaigns</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/donations">Donations</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/profile">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <img th:src="${campaign.imageUrl}" class="img-fluid rounded mb-4" alt="Campaign Image">
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title" th:text="${campaign.title}">Campaign Title</h2>
+                        <p class="text-muted">
+                            <i class="fas fa-user"></i> Organized by 
+                            <span th:text="${campaign.organizer.firstName + ' ' + campaign.organizer.lastName}">Organizer Name</span>
+                        </p>
+                        
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 th:style="'width: ' + ${campaign.progressPercentage} + '%'"
+                                 th:text="${campaign.progressPercentage} + '%'">
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-4">
+                            <div>
+                                <h5>Current Amount</h5>
+                                <h3 class="text-success">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span th:text="${campaign.currentAmount}">0</span>
+                                </h3>
+                            </div>
+                            <div>
+                                <h5>Goal Amount</h5>
+                                <h3>
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span th:text="${campaign.goalAmount}">0</span>
+                                </h3>
+                            </div>
+                            <div>
+                                <h5>Time Left</h5>
+                                <h3>
+                                    <i class="fas fa-clock"></i>
+                                    <span th:text="${#temporals.format(campaign.endDate, 'dd MMM yyyy')}">End Date</span>
+                                </h3>
+                            </div>
+                        </div>
+                        
+                        <h4>About this Campaign</h4>
+                        <p class="card-text" th:text="${campaign.description}">Description</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">Make a Donation</h4>
+                        <form th:action="@{/donations/create}" method="post" sec:authorize="isAuthenticated()">
+                            <input type="hidden" name="campaignId" th:value="${campaign.id}">
+                            
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                    <input type="number" class="form-control" id="amount" name="amount" 
+                                           min="1" step="0.01" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Message (Optional)</label>
+                                <textarea class="form-control" id="message" name="message" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="anonymous" name="anonymous">
+                                <label class="form-check-label" for="anonymous">Make donation anonymous</label>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-heart"></i> Donate Now
+                            </button>
+                        </form>
+                        
+                        <div class="alert alert-info mt-3" sec:authorize="!isAuthenticated()">
+                            Please <a href="/login">login</a> to make a donation.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Recent Donations</h4>
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item" th:each="donation : ${campaign.donations}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0" th:text="${donation.anonymous ? 'Anonymous' : donation.user.firstName + ' ' + donation.user.lastName}">
+                                            Donor Name
+                                        </h6>
+                                        <small class="text-muted" th:text="${#temporals.format(donation.createdAt, 'dd MMM yyyy')}">
+                                            Donation Date
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span th:text="${donation.amount}">Amount</span>
+                                    </span>
+                                </div>
+                                <p class="mb-0 text-muted" th:if="${donation.message}" th:text="${donation.message}">
+                                    Donation message
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
