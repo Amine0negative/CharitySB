@@ -34,17 +34,6 @@ A comprehensive web application for managing charity organizations, actions, don
 - MySQL 8.0 or PostgreSQL 13+
 - Maven 3.8+
 
-### Database Setup
-
-1. **MySQL Setup**:
-   - Create a database named `charity_management`
-   - Run the provided MySQL script: `mysql-database-script.sql`
-
-2. **PostgreSQL Setup** (Alternative):
-   - Create a database named `charity_management`
-   - Run the provided PostgreSQL script: `postgresql-database-script.sql`
-   - Uncomment the PostgreSQL configuration in `DatabaseConfig.java`
-
 ### Application Configuration
 
 1. Clone the repository or extract the provided ZIP file
@@ -59,17 +48,6 @@ A comprehensive web application for managing charity organizations, actions, don
 3. Run the application: `java -jar target/charity-management-app-0.0.1-SNAPSHOT.jar`
 4. Access the application at: `http://localhost:8080`
 
-## Default Users
-
-The application comes with pre-configured users for testing:
-
-1. **Admin User**:
-   - Email: admin@example.com
-   - Password: admin123
-
-2. **Regular User**:
-   - Email: user@example.com
-   - Password: user123
 
 ## Application Structure
 
@@ -85,14 +63,3 @@ The application comes with pre-configured users for testing:
   - `templates/` - Thymeleaf templates
   - `static/` - Static resources (CSS, JS, images)
   - `i18n/` - Internationalization files
-
-## Customization
-
-- Modify `application.properties` for application settings
-- Update CSS in `src/main/resources/static/css/main.css`
-- Modify JavaScript in `src/main/resources/static/js/main.js`
-- Add or modify language support in `src/main/resources/i18n/`
-
-## License
-
-This application is provided for educational and demonstration purposes.
